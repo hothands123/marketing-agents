@@ -52,7 +52,7 @@ Every channel has 8 specialized agents. They research, analyze, strategize, crea
 ## Install
 
 ```bash
-git clone https://github.com/hugodrummon/marketing-agents.git
+git clone https://github.com/hothands123/marketing-agents.git
 cd marketing-agents && bash install.sh
 ```
 
@@ -196,4 +196,4 @@ MIT — use it however you want.
 
 ---
 
-Built by [Drummond Holdings](https://github.com/hugodrummon). Star the repo if it's useful.
+Built by [Drummond Holdings](https://github.com/hothands123). Star the repo if it's useful.
