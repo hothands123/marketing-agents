@@ -1,0 +1,101 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check file structure
+        run: |
+          echo "=== Checking required files ==="
+          for f in install.sh uninstall.sh README.md LICENSE CLAUDE.md schema.sql SECURITY.md CONTRIBUTING.md CHANGELOG.md; do
+            if [ ! -f "$f" ]; then
+              echo "MISSING: $f"
+              exit 1
+            fi
+            echo "✓ $f"
+          done
+
+      - name: Check skills
+        run: |
+          echo "=== Checking skills ==="
+          count=0
+          for d in skills/*/; do
+            if [ ! -f "${d}SKILL.md" ]; then
+              echo "MISSING: ${d}SKILL.md"
+              exit 1
+            fi
+            echo "✓ ${d}SKILL.md"
+            count=$((count + 1))
+          done
+          echo "Skills: $count"
+
+      - name: Check agents
+        run: |
+          echo "=== Checking agents ==="
+          count=$(ls agents/*.md 2>/dev/null | wc -l)
+          echo "Agents: $count"
+          if [ "$count" -lt 30 ]; then
+            echo "Expected 30+ agents, found $count"
+            exit 1
+          fi
+          echo "✓ All agents present"
+
+      - name: Check commands
+        run: |
+          echo "=== Checking commands ==="
+          count=$(ls commands/*.md 2>/dev/null | wc -l)
+          echo "Commands: $count"
+          if [ "$count" -lt 4 ]; then
+            echo "Expected 4+ commands, found $count"
+            exit 1
+          fi
+          echo "✓ All commands present"
+
+      - name: Check frontmatter
+        run: |
+          echo "=== Checking agent frontmatter ==="
+          for f in agents/*.md; do
+            if ! head -1 "$f" | grep -q "^---"; then
+              echo "MISSING frontmatter: $f"
+              exit 1
+            fi
+          done
+          echo "✓ All agents have frontmatter"
+
+      - name: Validate SQL
+        run: |
+          echo "=== Checking schema.sql ==="
+          if ! grep -q "marketing_knowledge" schema.sql; then
+            echo "MISSING: marketing_knowledge table in schema.sql"
+            exit 1
+          fi
+          echo "✓ Schema valid"
+
+      - name: Security scan
+        run: |
+          echo "=== Scanning for secrets ==="
+          if grep -rn "sk-\|pk_\|eyJ\|password\s*=" --include="*.md" --include="*.sql" --include="*.sh" .; then
+            echo "POTENTIAL SECRET FOUND"
+            exit 1
+          fi
+          echo "✓ No secrets detected"
+
+      - name: Summary
+        run: |
+          echo ""
+          echo "══════════════════════════════"
+          echo "  Marketing Agents v1.0.0"
+          echo "══════════════════════════════"
+          echo "  Skills:   $(ls skills/*/SKILL.md | wc -l)"
+          echo "  Agents:   $(ls agents/*.md | wc -l)"
+          echo "  Commands: $(ls commands/*.md | wc -l)"
+          echo "  All checks passed ✓"
+          echo "══════════════════════════════"
