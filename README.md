@@ -184,6 +184,38 @@ The shared brain uses a Supabase table. To enable cross-session learning:
 
 Without Supabase, agents still work — they just don't persist learnings across sessions.
 
+## Connecting to Meta Ads (Optional)
+
+If you want the agents to actually deploy ads to Meta, you'll need to set up a Meta App. It sounds more intimidating than it is — took me about 15 minutes.
+
+1) Go to developers.facebook.com and create a new app. Pick "Business" as the type. Give it whatever name you want.
+
+2) Once the app is created, go to App Settings > Basic and grab your App ID and App Secret. You'll need these later.
+
+3) Now go to Business Settings in your Meta Business Suite (business.facebook.com). Under Users > System Users, create a new system user. Give it Admin access.
+
+4) Click "Generate New Token" on that system user. Select your app from the dropdown, then tick these permissions:
+   - ads_management
+   - ads_read
+   - pages_read_engagement
+   - pages_manage_posts
+
+5) Copy that token. That's your META_SYSTEM_USER_TOKEN.
+
+6) While you're in Business Settings, go to Accounts > Ad Accounts and grab your ad account ID. It looks like act_123456789.
+
+7) Create a .env file in your project root:
+
+```
+META_AD_ACCOUNT_ID=act_123456789
+META_SYSTEM_USER_TOKEN=your_long_token_here
+META_PAGE_ID=your_facebook_page_id
+```
+
+That's it. The Campaign Deployment agent reads from this file. All campaigns deploy PAUSED — nothing spends money until you manually activate it in Ads Manager.
+
+If you don't want to deal with any of this, the Adspirer MCP handles the auth flow for you. You just connect your ad account through their interface and the agents call it as an MCP tool instead.
+
 ## Uninstall
 
 ```bash
